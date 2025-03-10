@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="view-port" content="width=device-width,initial-scale=1.0" />
+  <title>You / @{{ username }}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='/style.css') }}"/>
+  <link rel="stylesheet" href="{{ url_for('static', path='/profile.css') }}"/>
+</head>
+<body>
+  <main class="root">
+    <div class="user-profile-info" id="root-container">
+      <div class="user-profile">
+        <div class="image-and-name">
+          <img src="{{ display_profile }}" class="profile-picture"/>
+          <p id="users-username" class="user-name-text">@{{ username }}</p>
+          <div class="user-bio">
+            <p class="font-monospace">{{userbio}}</p>
+          </div>
+          <div>
+            <a class="btn btn-secondary" id="edit-user-profile">edit profile</a>
+            <a class="btn btn-primary" href="/new-post">new post</a>
+          </div>
+          <p>
+            <a>followers</a>
+            <a>following</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <div class="user-posts" id="root-container">
+      <div class="post-tabs">
+        <ul class="nav nav-tabs">
+          {% if public %}
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="/profile/main">public</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/profile/private">private</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="nav-link" href="/profile/main">public</a>
+            </li>
+            <li class="nav-item active" aria-current="page" href="/profile/private">
+              <a class="nav-link">private</a>
+            </li>
+          {% endif %}
+        </ul>
+      </div>
+      {% if (posts|length) == 0 %}
+        <div class="no-post-container">
+          <h2 class="fw-light">Nothing here!</h2>
+        </div>
+      {% else %}
+          <div class="user-posts-container">
+      {%  for post in posts %}
+            <div class="card" style="width: 17rem;" id="users-posts-display">
+              <img src="{{ post.postimage.decode() }}" class="card-img-top" alt="{{ post.id }}">
+            </div>
+      {%  endfor %}
+          </div>
+      {% endif %}
+    </div>
+    <dialog class="update-profile-dialog">
+      <button type="button" id="close-dialog" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      <div class="dialog-top-header">
+        <header>Update profile</header>
+      </div>
+      <hr />
+      <div class="form-container">
+        <form method="post" action="/update-profile">
+          <div class="form-group">
+            <img src="{{ display_profile }}" class="img-thumbnail" style="border-radius: 50%;"/>
+            <button class="btn btn-primary" id="add-profile-photo-btn">+</button>
+            <input value="{{ display_profile }}" type="text" class="invisible-input" name="updatedProfile" />
+          </div>
+          <div class="form-group">
+            <label for="userName">username</label>
+            <input type="text" class="form-control" id="userName" name="username" 
+            placeholder="enter username..." value="{{username}}" required/>
+          </div>
+          <div class="form-group">
+            <label for="userBio">bio</label>
+            <textarea maxlength="100" class="form-control" style="resize: none;" 
+            rows="3" id="userBio" name="userbio">{{userbio}}</textarea>
+          </div>
+          <button type="submit" class="btn btn-danger">submit</button>
+        </form>
+      </div>
+    </dialog>
+  </main>
+  <script src="{{ url_for('static', path='/fileloader.js')}}"></script>
+  <script src="{{ url_for('static', path='/profile.js') }}"></script>
+</body>
+</html>

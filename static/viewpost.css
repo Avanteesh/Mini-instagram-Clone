@@ -1,0 +1,61 @@
+*,*::before,*::after {
+  box-sizing: border-box;
+}
+body {
+  display: grid;
+  place-items: center;
+  overflow-x: hidden;
+  overflow-y: scroll;
+}
+.root {
+  margin: .9em;
+  width: 90%;
+}
+.root .post-viewbar .post-container {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  margin: 3em;
+}
+#dialog-box {
+  position: absolute;
+  transform: translate(-50%,-50%);
+  border: none;
+  border-radius: .2em;
+  overflow: hidden;
+}
+#dialog-box div {
+  width: 99%;
+}
+.confirm-dialog {
+  left: 23%;
+  top: 23%;
+}
+#dialog-box .model-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2em;
+}
+.post-comments-dialog {
+  --ratio: .8;
+  aspect-ratio: var(--ratio);
+  top: 67%;
+  left: 33%;
+  width: 60vh;
+  box-shadow: 0 0 1em .1em;
+}
+.post-comments-dialog .comments-frame {
+  display: grid;
+  grid-template-columns: repeat(1,1fr);
+  width: 98%;
+  aspect-ratio: calc(var(--ratio) + 0.2);
+  overflow-x: hidden;
+  overflow-y: scroll;
+  background: #fcfeff;
+}
+.post-comments-dialog .comment-post-box {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}

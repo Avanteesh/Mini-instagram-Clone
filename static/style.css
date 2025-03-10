@@ -1,0 +1,27 @@
+*,*::before,*::after {
+  box-sizing: border-box;
+}
+body {
+  display: grid;
+  place-items: center;
+}
+.root {
+  display: grid;
+  place-items: center;
+  width: 40%;
+  height: 100vh; 
+  padding: 4em;
+}
+.root .login-form-wrapper {
+  display: grid;
+  place-items: center;
+  width: 30vh;
+  aspect-ratio: 1.1;
+}
+.invisible-input {
+  height: 0;
+  width: 0;
+  opacity: 0;
+  cursor: default;
+}
+
