@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 from sqlmodel import (Session, select, update, delete)
 from passlib.context import CryptContext
 from datetime import datetime, timedelta
-from models import db_engine, User, UserInDB, Post, Comments
+from models import db_engine, User, UserInDB, Post, Comments, Follower
 from models import TokenData, Token, dateDifferenceInText, Likes
 from os import environ
 from dotenv import load_dotenv
@@ -138,13 +138,14 @@ async def openProfilePage(request: Request, user: User=Depends(getCurrentUser)):
     ).fetchall()
     userfollowers = session.exec(
       select(Follower.follower_id, User.username).join(
-        Follower, Follower.follower_id == User.user_id
+        Follower, Follower.follower_id == User.id
       ).where(Follower.user_id == user.id)
     ).fetchall()
     return templates.TemplateResponse(
       request, name="profile.html",context={
         "username": user.username, "display_profile": user.display_profile.decode("utf-8"),
-        "userbio": user.userbio, "posts": publicposts, "public": True
+        "userbio": user.userbio, "posts": publicposts, "public": True,
+        "sameuser": True
       }
     )
 
@@ -158,7 +159,8 @@ async def openProfileWithPrivatePost(request: Request, user: User=Depends(getCur
     return templates.TemplateResponse(
       request, name="profile.html", context={
         "username": user.username, "display_profile": user.display_profile.decode("utf-8"),
-        "userbio": user.userbio, "posts": privateposts, "public": False
+        "userbio": user.userbio, "posts": privateposts, "public": False,
+        "sameuser": True
       }
     )
 
@@ -198,8 +200,23 @@ async def updateProfileDetails(request: Request,username: str=Form(...), userbio
     return template_res
 
 @app.get("/profile/{username}", response_class=HTMLResponse)
-async def showOtherUsersProfile(request: Request, user: User=Depends(getCurrentUser)):
-    ...
+async def showOtherUsersProfile(username: str,request: Request,user: User=Depends(getCurrentUser)):
+    if username == user.username:   # if query user is same as logged in user go to profile page!
+        return RedirectResponse(url="/profile/main", status_code=303)  
+    targetuser = session.exec(select(User).where(User.username == username)).first()
+    if targetuser is None:
+        raise credential_exception
+    posts = session.exec(
+      select(Post).where(Post.user_id == targetuser.id).where(
+        Post.ispublic == True
+      )
+    ).fetchall()
+    return templates.TemplateResponse(
+      request, name='profile.html', context={
+        "public": True, "posts": posts, "display_profile": targetuser.display_profile.decode(),
+        "userbio": targetuser.userbio, "username": username, "sameuser": False
+      }
+    )
 
 @app.get("/post/{username}/{post_id}", response_class=HTMLResponse)
 async def viewPost(username: str, post_id: str, request: Request, user: User=Depends(getCurrentUser)):

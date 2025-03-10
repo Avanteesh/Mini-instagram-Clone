@@ -18,10 +18,16 @@
           <div class="user-bio">
             <p class="font-monospace">{{userbio}}</p>
           </div>
-          <div>
-            <a class="btn btn-secondary" id="edit-user-profile">edit profile</a>
-            <a class="btn btn-primary" href="/new-post">new post</a>
-          </div>
+          {% if sameuser %}
+            <div>
+              <a class="btn btn-secondary" id="edit-user-profile">edit profile</a>
+              <a class="btn btn-primary" href="/new-post">new post</a>
+            </div>
+          {% else %}
+            <div>
+              <a class="btn btn-primary" id="follow-user">follow</a>
+            </div>
+          {% endif %}
           <p>
             <a>followers</a>
             <a>following</a>
@@ -30,25 +36,27 @@
       </div>
     </div>
     <div class="user-posts" id="root-container">
-      <div class="post-tabs">
-        <ul class="nav nav-tabs">
-          {% if public %}
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="/profile/main">public</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/profile/private">private</a>
-            </li>
-          {% else %}
-            <li class="nav-item">
-              <a class="nav-link" href="/profile/main">public</a>
-            </li>
-            <li class="nav-item active" aria-current="page" href="/profile/private">
-              <a class="nav-link">private</a>
-            </li>
-          {% endif %}
-        </ul>
-      </div>
+      {% if sameuser %}
+        <div class="post-tabs">
+          <ul class="nav nav-tabs">
+            {% if public %}
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="/profile/main">public</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/profile/private">private</a>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="/profile/main">public</a>
+              </li>
+              <li class="nav-item active" aria-current="page" href="/profile/private">
+                <a class="nav-link">private</a>
+              </li>
+            {% endif %}
+          </ul>
+        </div>
+      {% endif %}
       {% if (posts|length) == 0 %}
         <div class="no-post-container">
           <h2 class="fw-light">Nothing here!</h2>
@@ -63,33 +71,35 @@
           </div>
       {% endif %}
     </div>
-    <dialog class="update-profile-dialog">
-      <button type="button" id="close-dialog" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
-      <div class="dialog-top-header">
-        <header>Update profile</header>
-      </div>
-      <hr />
-      <div class="form-container">
-        <form method="post" action="/update-profile">
-          <div class="form-group">
-            <img src="{{ display_profile }}" class="img-thumbnail" style="border-radius: 50%;"/>
-            <button class="btn btn-primary" id="add-profile-photo-btn">+</button>
-            <input value="{{ display_profile }}" type="text" class="invisible-input" name="updatedProfile" />
-          </div>
-          <div class="form-group">
-            <label for="userName">username</label>
-            <input type="text" class="form-control" id="userName" name="username" 
-            placeholder="enter username..." value="{{username}}" required/>
-          </div>
-          <div class="form-group">
-            <label for="userBio">bio</label>
-            <textarea maxlength="100" class="form-control" style="resize: none;" 
-            rows="3" id="userBio" name="userbio">{{userbio}}</textarea>
-          </div>
-          <button type="submit" class="btn btn-danger">submit</button>
-        </form>
-      </div>
-    </dialog>
+    {% if sameuser %}
+      <dialog class="update-profile-dialog">
+        <button type="button" id="close-dialog" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+        <div class="dialog-top-header">
+          <header>Update profile</header>
+        </div>
+        <hr />
+        <div class="form-container">
+          <form method="post" action="/update-profile">
+            <div class="form-group">
+              <img src="{{ display_profile }}" class="img-thumbnail" style="border-radius: 50%;"/>
+              <button class="btn btn-primary" id="add-profile-photo-btn">+</button>
+              <input value="{{ display_profile }}" type="text" class="invisible-input" name="updatedProfile" />
+            </div>
+            <div class="form-group">
+              <label for="userName">username</label>
+              <input type="text" class="form-control" id="userName" name="username" 
+              placeholder="enter username..." value="{{username}}" required/>
+            </div>
+            <div class="form-group">
+              <label for="userBio">bio</label>
+              <textarea maxlength="100" class="form-control" style="resize: none;" 
+              rows="3" id="userBio" name="userbio">{{userbio}}</textarea>
+            </div>
+            <button type="submit" class="btn btn-danger">submit</button>
+          </form>
+        </div>
+      </dialog>
+    {% endif %}
   </main>
   <script src="{{ url_for('static', path='/fileloader.js')}}"></script>
   <script src="{{ url_for('static', path='/profile.js') }}"></script>
