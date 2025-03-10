@@ -3,9 +3,9 @@
 ## enables users to share Only photos (as of now!) and follow, like and comment on other users profiles
 
 <div>
-  <img height="80" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/fastapi/fastapi-original.svg" />
-  <img height="80" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sqlite/sqlite.svg" />
-  <img height="80" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" />
+  <img height="100" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/fastapi/fastapi-original.svg" />
+  <img height="100" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sqlite/sqlite-original.svg" />
+  <img height="100" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" />
 </div>
 
 <p>
