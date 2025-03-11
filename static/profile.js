@@ -3,16 +3,21 @@
   const updateProfileDialog = document.querySelector(".update-profile-dialog");
   const closeDialogBtn = document.querySelector("#close-dialog");
   const userPosts = document.querySelectorAll("#users-posts-display");
-  const setStatusBtn = document.querySelector("#set-status-btn")
+  const setStatusBtn = document.querySelector("#set-status-btn");
+  const followUser = document.querySelector("#follow-user");
 
-  editUserProfile.addEventListener("click", function(evt) {
-    updateProfileDialog.showModal();
-  });
+  if (editUserProfile !== null)  {
+    editUserProfile.addEventListener("click", function(evt) {
+      updateProfileDialog.showModal();
+    });
+  }
 
-  closeDialogBtn.addEventListener("click", function(evt)  {
-    if (window.confirm("Are you sure you want to cancel?"))  
-      updateProfileDialog.close();
-  });
+  if (closeDialogBtn !== null)  {
+    closeDialogBtn.addEventListener("click", function(evt)  {
+      if (window.confirm("Are you sure you want to cancel?"))  
+        updateProfileDialog.close();
+    });
+  }
 
   if (setStatusBtn !== null)  {
     const statusDialog = document.querySelector(".set-status-dialog");
@@ -35,6 +40,21 @@
     emojiFormInput.addEventListener("change", function(evt)  {
       statusInputText.value += evt.target.value;
     }, false);
+  }
+
+  if (followUser !== null)  {
+    const parenturl = new URL(window.location.href);
+    followUser.addEventListener("click", function(evt)  {
+      if (evt.isTrusted === false)
+        return;
+      fetch(`/follow?username=${parenturl.searchParams.get("username")}`, {
+        method: 'PUT', headers: {'Content-Type': 'application/json'}
+      }).then((res) => {
+        return res.json()
+      })
+      window.location.reload();
+      window.location.href = `/profile?username=${parenturl.searchParams.get("username")}`;
+    }, false)
   }
 
   userPosts.forEach((userPost) => {

@@ -29,7 +29,12 @@
             </div>
           {% else %}
             <div>
-              <a class="btn btn-primary" id="follow-user">follow</a>
+              {% if activeuserfollows == False %}
+                <a class="btn btn-primary" id="follow-user">follow</a>
+              {% else %}
+                <!--show option to unfollow user--->
+                <a class="btn btn-outline-primary" id="follow-user">unfollow</a>
+              {% endif %}
             </div>
           {% endif %}
           <div>

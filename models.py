@@ -13,7 +13,7 @@ def loadDefaultProfile() -> bytes:
         result = f2.read()
     return b64encode(result)
 
-def dateDifferenceInText(date_inp: datetime):
+def dateDifferenceInText(date_inp: datetime) -> str:
     difference = datetime.now() - date_inp
     if difference.seconds < 60:
         return f"{int(difference.seconds)} seconds ago"
