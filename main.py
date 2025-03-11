@@ -14,6 +14,7 @@ from os import environ
 from dotenv import load_dotenv
 from datetime import date as Date
 from json import loads, dumps
+from redis import Redis
 
 load_dotenv()
 app = FastAPI()
@@ -22,6 +23,7 @@ templates = Jinja2Templates("templates")
 session = Session(db_engine)
 pwd_context = CryptContext(schemes=["bcrypt"],deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+redisclient = Redis(host=environ.get("HOST"))
 
 def getUser(username: str, email: str) -> User:
     query = session.exec(
@@ -129,6 +131,14 @@ async def loginTheUser(request: Request, username: str=Form(...),email: str=Form
     template_res.set_cookie(key="session", value=new_accesstoken)
     return template_res
 
+def fetchUsersStatus(userid: str) -> list[str]:
+    count = 0
+    result = []
+    while redisclient.get(f"{userid}:{count}"):
+        result.append(redisclient.get(f"{userid}:{count}"))
+        count += 1
+    return result
+
 @app.get("/profile/main", response_class=HTMLResponse)
 async def openProfilePage(request: Request, user: User=Depends(getCurrentUser)):
     publicposts = session.exec(
@@ -141,11 +151,12 @@ async def openProfilePage(request: Request, user: User=Depends(getCurrentUser)):
         Follower, Follower.follower_id == User.id
       ).where(Follower.user_id == user.id)
     ).fetchall()
+    usersstatus = fetchUsersStatus(user.id)
     return templates.TemplateResponse(
       request, name="profile.html",context={
         "username": user.username, "display_profile": user.display_profile.decode("utf-8"),
         "userbio": user.userbio, "posts": publicposts, "public": True,
-        "sameuser": True
+        "sameuser": True, "followers": userfollowers, "statuslist": usersstatus
       }
     )
 
@@ -156,11 +167,17 @@ async def openProfileWithPrivatePost(request: Request, user: User=Depends(getCur
         Post.ispublic == False
       ).order_by(Post.postDate)
     ).fetchall()
+    userfollowers = session.exec(
+      select(Follower.follower_id, User.username).join(
+        Follower, Follower.follower_id == User.id
+      ).where(Follower.user_id == user.id)
+    ).fetchall()
+    usersstatus = fetchUsersStatus(user.id)  # fetch current user's status
     return templates.TemplateResponse(
       request, name="profile.html", context={
         "username": user.username, "display_profile": user.display_profile.decode("utf-8"),
         "userbio": user.userbio, "posts": privateposts, "public": False,
-        "sameuser": True
+        "sameuser": True, "followers": userfollowers, "statuslist": usersstatus
       }
     )
 
@@ -199,8 +216,8 @@ async def updateProfileDetails(request: Request,username: str=Form(...), userbio
     template_res.set_cookie(key="session",value=new_cookie)
     return template_res
 
-@app.get("/profile/{username}", response_class=HTMLResponse)
-async def showOtherUsersProfile(username: str,request: Request,user: User=Depends(getCurrentUser)):
+@app.get("/profile", response_class=HTMLResponse)
+async def showOtherUsersProfile(request: Request,username: str,user: User=Depends(getCurrentUser)):
     if username == user.username:   # if query user is same as logged in user go to profile page!
         return RedirectResponse(url="/profile/main", status_code=303)  
     targetuser = session.exec(select(User).where(User.username == username)).first()
@@ -211,10 +228,19 @@ async def showOtherUsersProfile(username: str,request: Request,user: User=Depend
         Post.ispublic == True
       )
     ).fetchall()
+    userfollowers = session.exec(
+      select(Follower.follower_id, User.username).join(
+        Follower, Follower.user_id == User.id
+      ).where(Follower.user_id == targetuser.id)
+    ).fetchall()
+    usersstatus = fetchUsersStatus(targetuser.id)   # fetch status of user
     return templates.TemplateResponse(
       request, name='profile.html', context={
-        "public": True, "posts": posts, "display_profile": targetuser.display_profile.decode(),
-        "userbio": targetuser.userbio, "username": username, "sameuser": False
+        "public": True, "posts": posts, 
+        "display_profile": targetuser.display_profile.decode(),
+        "userbio": targetuser.userbio, "username": username, 
+        "sameuser": False, "followers": userfollowers, 
+        "statuslist": usersstatus
       }
     )
 
@@ -311,8 +337,18 @@ async def addNewComment(post_id: str, comment: str, user: User=Depends(getCurren
 
 @app.put("/edit-comment")
 async def editComment(comment_id: str, comment: str, user: User=Depends(getCurrentUser)):
-    print(comment)
-    
+    ...
+
+@app.post("/add-status")
+async def addStatus(statustext: str=Form(...), user: User=Depends(getCurrentUser)):
+    count = 0
+    while True:
+        if redisclient.get(f"{user.id}:{count}"):
+            break
+        count += 1
+    redisclient.set(f"{user.id}:{count+1}", statustext)  # save the status key into the map
+    redisclient.expire(f"{user.id}:{count+1}", 86400)  # expires in 24 hours!
+    return RedirectResponse(url="/profile/main", status_code=303)
     
 @app.delete("/delete-post/{post_id}")
 async def deletePost(post_id: str, user: User=Depends(getCurrentUser)):
@@ -331,7 +367,10 @@ async def deleteComment(post_id: str, comment_id: str, user: User=Depends(getCur
 @app.get("/home", response_class=HTMLResponse)
 async def home(request: Request, user: User=Depends(getCurrentUser)):
     return templates.TemplateResponse(
-      request, name="home.html"
+      request, name="home.html", context={
+        "display_profile": user.display_profile.decode(),
+        "username": user.username
+      }
     )
 
 

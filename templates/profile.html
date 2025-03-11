@@ -13,7 +13,11 @@
     <div class="user-profile-info" id="root-container">
       <div class="user-profile">
         <div class="image-and-name">
-          <img src="{{ display_profile }}" class="profile-picture"/>
+          {% if (statuslist|length) != 0 %}
+            <img src="{{ display_profile }}" class="profile-picture" id="show-profile"/>
+          {% else %}
+            <img src="{{ display_profile }}" class="profile-picture" id="show-status" />
+          {% endif %}
           <p id="users-username" class="user-name-text">@{{ username }}</p>
           <div class="user-bio">
             <p class="font-monospace">{{userbio}}</p>
@@ -28,10 +32,16 @@
               <a class="btn btn-primary" id="follow-user">follow</a>
             </div>
           {% endif %}
-          <p>
-            <a>followers</a>
-            <a>following</a>
-          </p>
+          <div>
+            <a><b>{{ followers|length }}</b> followers</a>
+            <a><b>0</b> following</a>
+          </div>
+          {% if sameuser %}
+            <div>
+              <button id="set-status-btn" class="btn btn-outline-success">set status</button>
+            </div>
+          {% endif %}
+          </div>
         </div>
       </div>
     </div>
@@ -100,6 +110,113 @@
         </div>
       </dialog>
     {% endif %}
+    {% if sameuser %}
+      <dialog class="set-status-dialog">
+        <button type="button" class="btn-close" id="close-set-status-dialog" data-bs-dismiss="toast" 
+        aria-label="Close"></button>
+        <div class="dialog-top-header">
+          <header>Set status</header>
+        </div>
+        <div class="form-container">
+          <form method="post" action="/add-status">
+            <div class="form-group" id="input-group">
+              <textarea maxlength="100" class="form-control" style="resize: none" rows="4" name="statustext" 
+                placeholder="enter something..." id="status-text-inp" required>working on something &#129312;...</textarea>
+              <div class="form-floating">
+                <select class="form-select" id="emojiformFloating" style="overflow-y: scroll;">
+                  <option value="&#128512;">&#128512;</option>
+                  <option value="&#128513;">&#128513;</option>
+                  <option value="&#128514;">&#128514;</option>
+                  <option value="&#128515;">&#128515;</option>
+                  <option value="&#128516;">&#128516;</option>
+                  <option value="&#128517;">&#128517;</option>
+                  <option value="&#128518;">&#128518;</option>
+                  <option value="&#128519;">&#128519;</option>
+                  <option value="&#128520;">&#128520;</option>
+                  <option value="&#128521;">&#128521;</option>
+                  <option value="&#128522;">&#128522;</option>
+                  <option value="&#128523;">&#128523;</option>
+                  <option value="&#128524;">&#128524;</option>
+                  <option value="&#128525;">&#128525;</option>
+                  <option value="&#128526;">&#128526;</option>
+                  <option value="&#128527;">&#128527;</option>
+                  <option value="&#128528;">&#128528;</option>
+                  <option value="&#128529;">&#128529;</option>
+                  <option value="&#128530;">&#128530;</option>
+                  <option value="&#128531;">&#128531;</option>
+                  <option value="&#128532;">&#128532;</option>
+                  <option value="&#128533;">&#128533;</option>
+                  <option value="&#128534;">&#128534;</option>
+                  <option value="&#128535;">&#128535;</option>
+                  <option value="&#128536;">&#128536;</option>
+                  <option value="&#128537;">&#128537;</option>
+                  <option value="&#128538;">&#128538;</option>
+                  <option value="&#128539;">&#128539;</option>
+                  <option value="&#128540;">&#128540;</option>
+                  <option value="&#128541;">&#128541;</option>
+                  <option value="&#128542;">&#128542;</option>
+                  <option value="&#128543;">&#128543;</option>
+                  <option value="&#128544;">&#128544;</option>
+                  <option value="&#128545;">&#128545;</option>
+                  <option value="&#128546;">&#128546;</option>
+                  <option value="&#128547;">&#128547;</option>
+                  <option value="&#128548;">&#128548;</option>
+                  <option value="&#128549;">&#128549;</option>
+                  <option value="&#128550;">&#128550;</option>
+                  <option value="&#128551;">&#128551;</option>
+                  <option value="&#128552;">&#128552;</option>
+                  <option value="&#128553;">&#128553;</option>
+                  <option value="&#128554;">&#128554;</option>
+                  <option value="&#128555;">&#128555;</option>
+                  <option value="&#128556;">&#128556;</option>
+                  <option value="&#128557;">&#128557;</option>
+                  <option value="&#128558;">&#128558;</option>
+                  <option value="&#128559;">&#128559;</option>
+                  <option value="&#128560;">&#128560;</option>
+                  <option value="&#128561;">&#128561;</option>
+                  <option value="&#128562;">&#128562;</option>
+                  <option value="&#128563;">&#128563;</option>
+                  <option value="&#128564;">&#128564;</option>
+                  <option value='&#128567;'>&#128565;</option>
+                  <option value="&#128568;">&#128568;</option>
+                  <option value="&#128569;">&#128569;</option>
+                  <option value="&#128570;">&#128570;</option>
+                  <option value="&#128571;">&#128571;</option>
+                  <option value="&#128572;">&#128572;</option>
+                </select>
+                <label for="emojiformFloating">Emoji</label>
+              </div>
+            </div>
+            <div class="button-container">
+              <button type="submit" class="btn btn-danger">submit</button>
+            </div>
+          </form>
+        </div>
+      </dialog>
+    {% endif %}
+    <dialog class="status-dialog">
+      <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Close"></button>
+      <div class="status-body">
+        <div id="carouselContent" class="carousel slide" data-ride="carousel">
+          <div class="carousel inner" role="listbox">
+            <div class="carousel-item active text-center p-4">
+              <p>First slide label</p>
+            </div>
+            <div class="carousel-item text-center p-4">
+              <p>Second slide</p>
+            </div>
+          </div>
+          <button class="carousel-control-prev" type="button" role="button" data-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="sr-only">Previous</span>
+          </button>
+          <button class="carousel-control-next" type="button" role="button" data-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="sr-only">Next</span>
+          </button>
+        </div>
+      </div>
+    </dialog>
   </main>
   <script src="{{ url_for('static', path='/fileloader.js')}}"></script>
   <script src="{{ url_for('static', path='/profile.js') }}"></script>
