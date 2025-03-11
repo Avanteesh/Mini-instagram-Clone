@@ -13,7 +13,7 @@
     <div class="user-profile-info" id="root-container">
       <div class="user-profile">
         <div class="image-and-name">
-          {% if (statuslist|length) != 0 %}
+          {% if (statuslist|length) == 0 %}
             <img src="{{ display_profile }}" class="profile-picture" id="show-profile"/>
           {% else %}
             <img src="{{ display_profile }}" class="profile-picture" id="show-status" />
