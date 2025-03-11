@@ -233,6 +233,10 @@ async def showOtherUsersProfile(request: Request,username: str,user: User=Depend
         Follower, Follower.user_id == User.id
       ).where(Follower.user_id == targetuser.id)
     ).fetchall()
+    userfollows = session.exec(
+      select(Follower).where(Follower.user_id == targetuser.id
+      ).where(Follower.follower_id == user.id)
+    ).first()
     usersstatus = fetchUsersStatus(targetuser.id)   # fetch status of user
     return templates.TemplateResponse(
       request, name='profile.html', context={
@@ -240,7 +244,7 @@ async def showOtherUsersProfile(request: Request,username: str,user: User=Depend
         "display_profile": targetuser.display_profile.decode(),
         "userbio": targetuser.userbio, "username": username, 
         "sameuser": False, "followers": userfollowers, 
-        "statuslist": usersstatus
+        "statuslist": usersstatus, "activeuserfollows": (userfollows != None)
       }
     )
 
@@ -325,7 +329,6 @@ async def createNewPost(postTitle: str=Form(...), postImage: bytes=Form(...),
 
 @app.put("/new-comment")
 async def addNewComment(post_id: str, comment: str, user: User=Depends(getCurrentUser)):
-    print(comment)
     session.add(Comments(comment=comment,post_id=post_id,user_id=user.id))
     session.commit()
     getpostowner = session.exec(
@@ -338,6 +341,26 @@ async def addNewComment(post_id: str, comment: str, user: User=Depends(getCurren
 @app.put("/edit-comment")
 async def editComment(comment_id: str, comment: str, user: User=Depends(getCurrentUser)):
     ...
+
+# follow a user request
+@app.put("/follow")
+async def followUser(username: str, user: User=Depends(getCurrentUser)):
+    getuserdata = session.exec(select(User).where(User.username == username)).first()
+    userAlreadyFollows = session.exec(
+      select(Follower).where(Follower.follower_id == user.id).where(
+        Follower.user_id == getuserdata.id
+      )
+    ).first()
+    if userAlreadyFollows:
+        session.exec(
+          delete(Follower).where(Follower.follower_id == user.id).where(
+            Follower.user_id == getuserdata.id
+          )
+        )
+    else:
+        session.add(Follower(user_id=getuserdata.id, follower_id=user.id))
+    session.commit()
+    return
 
 @app.post("/add-status")
 async def addStatus(statustext: str=Form(...), user: User=Depends(getCurrentUser)):
