@@ -6,6 +6,7 @@
   <img height="100" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/fastapi/fastapi-original.svg" />
   <img height="100" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/sqlite/sqlite-original.svg" />
   <img height="100" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" />
+  <img height="100" src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original.svg"/>
 </div>
 
 <p>
@@ -18,6 +19,7 @@
 <ul>
 <li>Python framework FastAPI (version 0.0.6 CLI)</li>
 <li>SQLmodel (SQL ORM) using sqlite3</li>
+<li>Redis (7.0.5) with python connector</li>
 <li>Redis and Redis connector with python</li>
 <li>passlib (Crypto library)</li>
 <li>jose for JSON Web token handling!</li>
